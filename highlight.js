@@ -4,7 +4,7 @@
 		/\b(typeof|instanceof|try|catch|finally|delete|switch|case|in|of|if|else|import|from|as|export|class|extends|new|return|throw|for|while|break|continue|async|await)\b/g
 	const special = () =>
 		/\b(window|document|self|top|process|require|module|define|global|Promise|Object|Array|String|Number|Symbol|Function|Reflect|Proxy|Error|length|push|pop|slice|splice|call|bind|apply|split)\b/g
-	const string = () => /((['"])[^\2\n\\]*(:?\\.[^\2\n\\]*)*\2)/g // original: /('[^'\n\\]*(:?\\.[^'\n\\]*)*')/g
+	const string = () => /((['"])[^\2\n\\]*?(:?\\.[^\2\n\\]*)*\2)/g // original: /('[^'\n\\]*(:?\\.[^'\n\\]*)*')/g
 	const number = () => /(\d+\.?\d+?|0x[0-9A-Fa-z]+)/g
 	const bool = () => /(true|false)/g
 	const null_ = () => /(null)/g
