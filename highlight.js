@@ -1,18 +1,17 @@
 ;(() => {
-	const keyword = () => /\b(var|let|const|function|this|do|super|constructor|instanceof|default)\b/g
+	const keyword = () => /\b(var|let|const|function|this|do|super|constructor|default)\b/g
 	const special_keyword = () =>
-		/\b(typeof|try|catch|finally|delete|switch|case|in|of|if|else|import|from|as|export|class|extends|new|return|throw|for|while|break|continue|async|await)\b/g
+		/\b(typeof|instanceof|try|catch|finally|delete|switch|case|in|of|if|else|import|from|as|export|class|extends|new|return|throw|for|while|break|continue|async|await)\b/g
 	const special = () =>
-		/\b(window|document|self|top|process|require|module|define|global|Promise|Array|String|Number|Symbol|Function|Reflect|Proxy|Error)\b/g
-	const dqstring = () => /("[^"\n\\]*(:?\\.[^"\n\\]*)*")/g
-	const sqstring = () => /('[^'\n\\]*(:?\\.[^'\n\\]*)*')/g
-	const number = () => /(\d+\.?\d+?)/g
+		/\b(window|document|self|top|process|require|module|define|global|Promise|Object|Array|String|Number|Symbol|Function|Reflect|Proxy|Error|length|push|pop|slice|splice|call|bind|apply|split)\b/g
+	const string = () => /((['"])[^\2\n\\]*(:?\\.[^\2\n\\]*)*\2)/g // original: /('[^'\n\\]*(:?\\.[^'\n\\]*)*')/g
+	const number = () => /(\d+\.?\d+?|0x[0-9A-Fa-z]+)/g
 	const bool = () => /(true|false)/g
 	const null_ = () => /(null)/g
 	const undefined_ = () => /(undefined)/g
-	const single_comment = () => /(\/\/[^\n]*)/g
+	const single_comment = () => /([\n\s])(\/\/[^\n]*)/g
 	const multiple_comment = () => /(\/\*[\s\S]*?\*\/)/g
-	const function_call = () => /(\w[A-Za-z0-9]*)(?=\()/g
+	const function_call = () => /([A-Za-z$][A-Za-z0-9$]*)(?=\()/g
 	const operator = () => /([\b\s\[\{\(])(=|[!=]=|[!=]==|\+\+?|--?|\*|\/|&&|\|\||!|<=?|>=?|>>|<<|\.\.\.)([\b\s\w])/g
 	const arrow = () => /(=>)/g
 	const typenotation = () => /%(\w+)%{=([\s\S]*?)=}%/g
@@ -32,9 +31,9 @@
 		cmt: '#75715e'
 	}
 	const highlight = (str, mode = 'standalone') => {
+		str = str.replace(arrow(), (m, g1) => `%ar%{=${x(g1)}=}%`)
 		str = str.replace(operator(), (m, g1, g2, g3) => `${g1}%op%{=${x(g2)}=}%${g3}`)
 		str = str.replace(keyword(), (m, g1) => `%kw%{=${x(g1)}=}%`)
-		str = str.replace(arrow(), (m, g1) => `%ar%{=${x(g1)}=}%`)
 		str = str.replace(special_keyword(), (m, g1) => `%skw%{=${x(g1)}=}%`)
 		str = str.replace(special(), (m, g1) => `%spc%{=${x(g1)}=}%`)
 		str = str.replace(function_call(), (m, g1) => `%fnc%{=${x(g1)}=}%`)
@@ -42,18 +41,18 @@
 		str = str.replace(bool(), (m, g1) => `%bool%{=${x(g1)}=}%`)
 		str = str.replace(null_(), (m, g1) => `%null%{=${x(g1)}=}%`)
 		str = str.replace(undefined_(), (m, g1) => `%ud%{=${x(g1)}=}%`)
-		str = str.replace(dqstring(), (m, g1) => `%str%{=${x(g1)}=}%`)
-		str = str.replace(sqstring(), (m, g1) => `%str%{=${x(g1)}=}%`)
-		str = str.replace(single_comment(), (m, g1) => `%cmt%{=${x(g1)}=}%`)
+		str = str.replace(string(), (m, g1) => `%str%{=${x(g1)}=}%`)
+		str = str.replace(single_comment(), (m, g1, g2) => `${g1}%cmt%{=${x(g2)}=}%`)
 		str = str.replace(multiple_comment(), (m, g1) => `%cmt%{=${x(g1)}=}%`)
-		str = str.replace(/</g, '&lt;') // escape `<`
 		if (mode === 'standalone') {
-			const code = str.replace(typenotation(), (m, g1, g2) => `<span style="color:${COLORMAP[g1]};">${g2}</span>`)
+			const code = str
+				.replace(/</g, '&lt;')
+				.replace(typenotation(), (m, g1, g2) => `<span style="color:${COLORMAP[g1]};">${g2}</span>`)
 			return `<pre style="tab-size:4;padding:1em;background-color:#2c292d;color:#f8f8f2;"><code>${code}</code></pre>`
 		} else if (mode === 'raw') {
 			return str
 		} else if (mode === 'external') {
-			const code = str.replace(typenotation(), '<span class="$1">$2</span>')
+			const code = str.replace(/</g, '&lt;').replace(typenotation(), '<span class="$1">$2</span>')
 			return `<pre class="hl"><code>${code}</code></pre>`
 		} else {
 			throw new Error('Unknown mode!')
