@@ -46,13 +46,14 @@
 		str = str.replace(sqstring(), (m, g1) => `%str%{=${x(g1)}=}%`)
 		str = str.replace(single_comment(), (m, g1) => `%cmt%{=${x(g1)}=}%`)
 		str = str.replace(multiple_comment(), (m, g1) => `%cmt%{=${x(g1)}=}%`)
+		str = str.replace(/</g, '&lt;') // escape `<`
 		if (mode === 'standalone') {
 			const code = str.replace(typenotation(), (m, g1, g2) => `<span style="color:${COLORMAP[g1]};">${g2}</span>`)
 			return `<pre style="tab-size:4;padding:1em;background-color:#2c292d;color:#f8f8f2;"><code>${code}</code></pre>`
 		} else if (mode === 'raw') {
 			return str
 		} else if (mode === 'external') {
-			const code =  str.replace(typenotation(), '<span class="$1">$2</span>')
+			const code = str.replace(typenotation(), '<span class="$1">$2</span>')
 			return `<pre class="hl"><code>${code}</code></pre>`
 		} else {
 			throw new Error('Unknown mode!')
